@@ -1,0 +1,27 @@
+# reelhelm — Asterisk + SIP trunk in Docker
+#
+# host networking is strongly recommended for SIP/RTP: it avoids Docker's NAT,
+# which otherwise breaks audio (one-way / no audio) and requires mapping the
+# entire RTP UDP range. With host networking the container uses the host's
+# network stack directly, so 5060/udp and the RTP range just work.
+services:
+  asterisk:
+    build: .
+    container_name: reelhelm
+    network_mode: host
+    restart: unless-stopped
+    # Asterisk runs in the foreground (asterisk -f). Without a TTY its stdin
+    # hits EOF immediately in a detached container and it shuts down cleanly
+    # ("Asterisk cleanly ending (0)"). Allocate a TTY + keep stdin open so it
+    # stays running.
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./data:/data
+    # If you cannot use host networking, comment out `network_mode: host`
+    # above and uncomment the bridge-mode ports below. Keep the RTP range in
+    # sync with settings.rtp_start / settings.rtp_end in data/config.json.
+    #
+    # ports:
+    #   - "5060:5060/udp"
+    #   - "10000-10100:10000-10100/udp"

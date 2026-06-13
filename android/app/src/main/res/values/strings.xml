@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ReelHelm</string>
+    <string name="sip_channel_name">SIP service</string>
+    <string name="sip_channel_desc">Keeps your SIP accounts registered</string>
+    <string name="call_channel_name">Calls</string>
+    <string name="message_channel_name">Messages</string>
+</resources>

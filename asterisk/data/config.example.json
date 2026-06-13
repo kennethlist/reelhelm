@@ -1,0 +1,50 @@
+{
+  "trunk": {
+    "provider": "sip-trunk",
+    "server": "sip1.example.com",
+    "username": "100000_subaccount",
+    "password": "CHANGE_ME_TRUNK_PASSWORD",
+    "did": "15551234567",
+    "register": true,
+    "encryption": true,
+    "tls_verify": true
+  },
+  "extensions": [
+    {
+      "id": "1001",
+      "password": "CHANGE_ME_EXT_PASSWORD",
+      "callerid": "Home <1001>",
+      "voicemail": {
+        "enabled": true,
+        "pin": "1234"
+      },
+      "call_recording": {
+        "enabled": true
+      },
+      "call_forward": {
+        "enabled": false,
+        "destination": "15559876543"
+      }
+    }
+  ],
+  "inbound_extension": "1001",
+  "blocklist": [
+    "15550001111",
+    "15552223333"
+  ],
+  "sms": {
+    "enabled": true
+  },
+  "logging": {
+    "calls": true,
+    "messages": true
+  },
+  "settings": {
+    "codecs": ["ulaw", "alaw"],
+    "rtp_start": 10000,
+    "rtp_end": 10100,
+    "external_ip": "auto",
+    "timezone": "America/New_York",
+    "client_encryption": true
+  }
+}

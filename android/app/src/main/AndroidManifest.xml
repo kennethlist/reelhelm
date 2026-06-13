@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Networking / SIP -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+
+    <!-- Foreground keep-alive service + per-call types -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Self-managed Telecom calls -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <!-- Launch the incoming-call screen over the lock screen directly (background
+         activity launch), as a backstop for OEM/AOSP builds that suppress the
+         notification's full-screen intent. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Audio -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+
+    <!-- Contacts (read-only) -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <!-- Notifications + full-screen incoming-call intent over the lock screen -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
+    <uses-feature android:name="android.hardware.microphone" android:required="true" />
+
+    <application
+        android:name=".SipApp"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ReelhelmSip"
+        tools:targetApi="31">
+
+        <!-- The main app is deliberately NOT showWhenLocked: it must never draw over
+             the keyguard, so tapping the keep-alive/message notification while locked
+             falls back to the normal unlock prompt. Only IncomingCallActivity below
+             is allowed over the lock screen. -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.ReelhelmSip">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Dedicated incoming-call surface. This is the ONLY activity allowed over
+             the keyguard: showWhenLocked + turnScreenOn (declared statically here so
+             the wake is reliable, no wake-lock hacks). The full-screen-intent CallStyle
+             notification launches it. It shows only the call — never the rest of the
+             app — so a locked device stays locked apart from the call itself. -->
+        <activity
+            android:name=".ui.IncomingCallActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:taskAffinity=".incoming"
+            android:theme="@style/Theme.ReelhelmSip" />
+
+        <!-- Long-lived foreground service that owns the PJSIP endpoint and keeps
+             all accounts registered. specialUse covers the idle/registration
+             state; phoneCall|microphone cover the active-call window. -->
+        <service
+            android:name=".sip.SipService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse|phoneCall|microphone">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Keeps SIP accounts registered to receive calls and messages" />
+        </service>
+
+        <!-- Self-managed ConnectionService: routes calls through the OS Telecom
+             stack (incoming UI, Bluetooth/car, audio focus). -->
+        <service
+            android:name=".telecom.SipConnectionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
+
+        <!-- Re-start the keep-alive service after a reboot. -->
+        <receiver
+            android:name=".sip.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

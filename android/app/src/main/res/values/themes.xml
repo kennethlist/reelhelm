@@ -1,0 +1,10 @@
+<resources>
+    <!-- Compose draws the UI; this base theme just needs Material3 + no action bar. -->
+    <style name="Theme.ReelhelmSip" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Opt out of Android 15's enforced edge-to-edge so windowSoftInputMode
+             "adjustResize" actually resizes the window when the keyboard opens.
+             That keeps the message list scrollable above the input instead of
+             relying on insets (imePadding double-counts on some OEMs). -->
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+</resources>

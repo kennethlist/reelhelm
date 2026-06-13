@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Scattered constellation: ~9 irregularly placed nodes wired into 7
+         triangles. The boundary is intentionally open/concave (outer nodes are
+         only partially linked) so it never closes into a polygon — no triangle,
+         no hexagon, just a network. Thin gradient-stroked edges, safe zone ~24..84. -->
+
+    <!-- Edges, stroked with a purple -> pink -> blue -> yellow gradient. -->
+    <path
+        android:pathData="M30,30 L54,24 M30,30 L40,48 M54,24 L40,48 M54,24 L78,36 M54,24 L66,52 M78,36 L66,52 M40,48 L66,52 M40,48 L50,70 M66,52 L50,70 M40,48 L26,66 M26,66 L50,70 M66,52 L80,72 M50,70 L80,72 M80,72 L58,84 M58,84 L50,70"
+        android:strokeWidth="2.5"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:type="linear"
+                android:startX="20" android:startY="20"
+                android:endX="88" android:endY="90">
+                <item android:offset="0.0" android:color="#FF8B5CF6" />
+                <item android:offset="0.35" android:color="#FFEC4899" />
+                <item android:offset="0.7" android:color="#FF3B82F6" />
+                <item android:offset="1.0" android:color="#FFFACC15" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>
