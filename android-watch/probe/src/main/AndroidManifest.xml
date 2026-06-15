@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- This is a Wear OS app, marked standalone (no companion phone required). -->
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <!-- Networking (SIP socket survival probe) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Foreground service to keep the socket alive (the "stay registered" model) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Telecom self-managed calling (third-party VoIP path) -->
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:roundIcon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <!-- Mark as a standalone Wear app -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Surfaced by the full-screen-intent notification to test whether Wear
+             renders a lock-screen-style incoming-call UI for a third-party app. -->
+        <activity
+            android:name=".telecom.IncomingCallActivity"
+            android:exported="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+
+        <!-- Self-managed ConnectionService: the OS routes the simulated incoming
+             call here and we observe what call UI (if any) appears on the watch. -->
+        <service
+            android:name=".telecom.TestConnectionService"
+            android:exported="true"
+            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService" />
+            </intent-filter>
+        </service>
+
+        <!-- Lets the adb harness trigger probe actions deterministically. -->
+        <receiver
+            android:name=".ProbeReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.reelhelm.weartest.PROBE" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Foreground service holding a persistent socket through Doze. -->
+        <service
+            android:name=".net.SocketProbeService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="voip-doze-viability-probe" />
+        </service>
+
+    </application>
+</manifest>
